@@ -8,12 +8,16 @@ const jwt = require("jsonwebtoken");
 
 exports.index = (req, res, next) => {
     Product.find().select("name signature stock details deleted_at  _id")
+        .populate('signature', "name email role _id")
         .exec(
             //
         ).then((doc)=>{
         console.log(doc);
         if(doc.length){
-            res.status(200).json(doc);
+            res.status(200).json({
+                code: 200,
+                data: doc
+            });
         }
         else{
             res.status(404).json({
@@ -77,7 +81,7 @@ exports.create = (req, res, next) => {
                 });
                 product.save().then(result => {
                     console.log('result=> ', result);
-                    return res.status(201).json({ "product": result, "message": 'Product Created Successfully' });
+                    return res.status(201).json({ code: 201, "message": 'Product Created Successfully', "product":{ data: result }  });
                 }).catch(err => {
                     console.log(err);
                     return res.status(400).json({ "message": err });
@@ -135,6 +139,7 @@ exports.update = (req,res) => {
                 console.log('doc=> ',doc);
                 if(doc.matchedCount>0 && doc.modifiedCount>0){
                     res.status(200).json({
+                        code: 200,
                         message : "successfully updated! "
                     });
                 }
@@ -182,6 +187,7 @@ exports.remove = (req,res) => {
                 console.log('doc=> ',doc);
                 if(doc.matchedCount>0 && doc.modifiedCount>0){
                     res.status(200).json({
+                        code: 200,
                         message : "successfully updated! "
                     });
                 }
@@ -226,6 +232,7 @@ exports.delete = (req,res) => {
         console.log(doc);
         if(doc.deletedCount>0){
             res.status(200).json({
+                code: 200,
                 message: "Product Deleted Succesfully!"
             });
         }
