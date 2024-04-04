@@ -80,7 +80,7 @@ exports.create = (req,res,next) => {
                             })
                         }).catch(err=>{
                             console.log(err)
-                            res.status(400).json({
+                            return res.status(400).json({
                                 "message":err,
                             })
                         })
@@ -255,6 +255,9 @@ exports.remove = (req,res) => {
         res.status(500).json({'error':err});
     })
 }
+
+
+
 
 
 exports.fetch_task = (req,res) => {

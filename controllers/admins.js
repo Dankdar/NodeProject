@@ -49,8 +49,8 @@ exports.create = (req,res,next) => {
 
     Admin.find({email: req.body.email})
         .exec()
-        .then(Admin=>{
-            if(Admin.length >= 1){
+        .then(admin=>{
+            if(admin.length >= 1){
                 return res.status(409).json({
                     message: "E-Mail Already Taken"
                 });
@@ -61,7 +61,7 @@ exports.create = (req,res,next) => {
                         return res.status(400).json({error:err});
                     }
                     else{
-                        const Admin = new Admin({
+                        const admin = new Admin({
                             _id: new mongoose.Types.ObjectId(),
                             name: req.body.name,
                             email: req.body.email,
@@ -69,21 +69,22 @@ exports.create = (req,res,next) => {
                             password: hash,
                             role: req.body.role
                         })
-                        Admin.save().then(result=> {
+                        admin.save().then(result=> {
                             console.log('result=> ',result);
                             res.status(201).json({
                                 "Admin":result,
                                 "message":'Admin Created Successfully',
                             })
-                        }).catch(err=>{
-                            console.log(err)
-                            res.status(400).json({
-                                "message":err,
-                            })
                         })
                     }
                 })
             }
+        })
+        .catch(err=>{
+            console.log(err)
+            res.status(400).json({
+                "message":err,
+            })
         })
 }
 
@@ -218,6 +219,51 @@ exports.update = (req,res) => {
 }
 
 exports.remove = (req,res) => {
+    const schema = Joi.object({
+        id: Joi.string().required()
+    })
+
+    const result = schema.validate(req.params);
+
+    const errors = [];
+    if(result.error){
+        result.error.details.forEach(item => {
+            errors.push(item.message);
+        })
+
+        res.status(400).send(errors);
+    }
+
+    Admin.updateOne({_id: req.params.id},{ $set: {
+            deleted_at: Date.now(),
+        }}).exec(
+    ).then((doc)=>{
+        console.log('doc=> ',doc);
+        if(doc.matchedCount>0 && doc.modifiedCount>0){
+            res.status(200).json({
+                message : "successfully soft deleted! "
+            });
+        }
+        else if(doc.matchedCount>0){
+            res.status(404).json({
+                message:`No entry Exists with ID: ${req.params.id}`
+            })
+        }
+        else {
+            res.status(404).json({
+                message:`Invalid Request on ID: ${req.params.id}`
+            })
+        }
+
+    })
+        .catch(err=> {
+            console.log(err)
+            res.status(500).json({'error':err});
+        })
+
+}
+
+exports.delete = (req,res) => {
     const schema = Joi.object({
         id: Joi.string().required()
     })

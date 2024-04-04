@@ -1,15 +1,16 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var adminssRouter = require('./routes/admins');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const adminsRouter = require('./routes/admins');
+const productsRouter = require('./routes/products');
 const mongoose = require("mongoose");
 
-var app = express();
+const app = express();
 
 mongoose.connect('mongodb+srv://huzaifadar:'+ process.env.MONGO_ATLAS_DB_PWD +'@cluster0.9sf9tqo.mongodb.net/') // mongodb+srv://huzaifadar:<password>@cluster0.9sf9tqo.mongodb.net/
 
@@ -36,7 +37,8 @@ app.use((req, res, next)=>{
 
 app.use('/', indexRouter); // open middleware
 app.use('/users', usersRouter); // employees and staff.
-app.use('/admins', adminssRouter); // admins and managers.
+app.use('/admins', adminsRouter); // admins and managers.
+app.use('/products', productsRouter); // admins and managers.
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
