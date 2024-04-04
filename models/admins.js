@@ -6,7 +6,7 @@ const adminSchema = mongoose.Schema({
     role: {
         type: String,
         enum: {
-            values: ['Admin', 'Owner'],
+            values: ['Admin', 'Manager'],
             message: '{VALUE} is not supported'
         },
         required: [true, 'role is Required']
@@ -17,14 +17,27 @@ const adminSchema = mongoose.Schema({
         // 1) If the promise rejects, Mongoose assumes the validator failed with the given error.
         // 2) If the promise resolves to `false`, Mongoose assumes the validator failed and creates an error with the given `message`.
         validate: {
-            validator: () => Promise.resolve(false),
-            message: 'Email validation failed'
+            validator: function(v) {
+                return /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/.test(v);
+            },
+            message: props => `${props.value} is not a valid email!`
         },
-        required: [true, 'Email is Required']
+        required: [true, 'Email is Required'],
+        unique: true
+    },
+    password: {
+        type: String,
+        validate: {
+            validator: function(v) {
+                return /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/.test(v);
+            },
+            message: props => `${props.value} is not a valid password!`
+        },
+        required: [true, 'Password is required']
     },
     name: {
         type: String,
-        required: [true, 'role is Required']},
+        required: [true, 'name is Required']},
     phone_number: {
         type: String,
         validate: {
@@ -32,12 +45,7 @@ const adminSchema = mongoose.Schema({
                 return /\d{3}-\d{3}-\d{4}/.test(v);
             },
             message: props => `${props.value} is not a valid phone number!`
-        },
-        required: [true, 'User phone number required']
-    },
-    image: {
-        type: String,
-        cast: '{VALUE} is not a string'
+        }
     },
     is_active: Boolean
 })
