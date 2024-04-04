@@ -1,12 +1,14 @@
-const Product = require("../models/products");
-const Admin = require("../models/admins");
+const Orders = require("../models/orders");
+const Users = require("../models/users");
+const Products = require("../models/products");
 const Joi = require("joi");
 const mongoose = require("mongoose");
 
 
 exports.index = (req, res, next) => {
-    Product.find().select("name signature stock details deleted_at  _id")
+    Orders.find().select("name signature stock details deleted_at  _id")
         .populate('signature', "name email role _id")
+        .populate('product', "name detail stock deleted_at avatar _id")
         .exec(
             //
         ).then((doc)=>{
@@ -19,7 +21,7 @@ exports.index = (req, res, next) => {
         }
         else{
             res.status(404).json({
-                message:"No Products Exists!"
+                message:"No Orders Exists!"
             })
         }
 
@@ -34,6 +36,7 @@ exports.create = (req, res, next) => {
         name: Joi.string().min(3).required(),
         stock: Joi.number().required(),
         details: Joi.string(),
+        product: Joi.string().min(8).required(),
     });
 
     const schemaId = Joi.object({
@@ -61,25 +64,26 @@ exports.create = (req, res, next) => {
     }
 
 
-    Admin.find({ _id: req.params.id })
+    Products.find({ _id: req.body.product })
         .exec()
-        .then(admin => {
-            if (admin.length === 0) {
-                console.log("doc", admin);
+        .then(product => {
+            if (product.length === 0) {
+                console.log("doc", product);
                 return res.status(400).json({
-                    message: "Invalid Id provided for admin Signature."
+                    message: "Invalid Product Id provided."
                 });
             } else {
-                const product = new Product({
+                const order = new Orders({
                     _id: new mongoose.Types.ObjectId(),
                     name: req.body.name,
                     signature: req.params.id,
+                    product: req.body.product,
                     stock: req.body.stock,
                     details: req.body.details
                 });
-                product.save().then(result => {
+                order.save().then(result => {
                     console.log('result=> ', result);
-                    return res.status(201).json({ code: 201, "message": 'Product Created Successfully', "product":{ data: result }  });
+                    return res.status(201).json({ code: 201, "message": 'Order Made Successfully', "order":{ data: result }  });
                 }).catch(err => {
                     console.log(err);
                     return res.status(400).json({ "message": err });
@@ -95,10 +99,9 @@ exports.update = (req,res) => {
 
     const schemaBody = Joi.object({
         name: Joi.string().min(3).required(),
-        email: Joi.string().min(3).required(),
-        phone_number: Joi.string().required(),
-        password: Joi.string().required(),
-        role: Joi.string().required()
+        stock: Joi.number().required(),
+        details: Joi.string(),
+        product: Joi.string().min(8).required(),
     })
 
     const result = schema.validate(req.params);
@@ -121,42 +124,35 @@ exports.update = (req,res) => {
         res.status(400).send(errors);
     }
 
-    bcrypt.hash(req.body.password,10,(err,hash)=>{
-        if (err){
-            return res.status(400).json({error:err});
+    Orders.updateOne({_id: req.params.id},{ $set: {
+            stock: req.body.stock,
+            details: req.body.details,
+            product: req.body.product,
+            is_completed: req.body.is_completed,
+        }}).exec(
+    ).then((doc)=>{
+        console.log('doc=> ',doc);
+        if(doc.matchedCount>0 && doc.modifiedCount>0){
+            res.status(200).json({
+                code: 200,
+                message : "successfully updated! "
+            });
         }
-        else{
-            Product.updateOne({_id: req.params.id},{ $set: {
-                    name: req.body.name,
-                    email: req.body.email,
-                    phone_number: req.body.phone_number,
-                    password: hash,
-                    role: req.body.role
-                }}).exec(
-            ).then((doc)=>{
-                console.log('doc=> ',doc);
-                if(doc.matchedCount>0 && doc.modifiedCount>0){
-                    res.status(200).json({
-                        code: 200,
-                        message : "successfully updated! "
-                    });
-                }
-                else if(doc.matchedCount>0){
-                    res.status(404).json({
-                        message:`No entry Exists with ID: ${req.params.id}`
-                    })
-                }
-                else {
-                    res.status(404).json({
-                        message:`Invalid Request on ID: ${req.params.id}`
-                    })
-                }
-
-            }).catch(err=> {
-                console.log(err)
-                res.status(500).json({'error':err});
+        else if(doc.matchedCount==0){
+            console.log('doc=> ',doc)
+            res.status(404).json({
+                message:`No entry Exists with ID: ${req.params.id}`
             })
         }
+        else {
+            res.status(404).json({
+                message:`Invalid Request on ID: ${req.params.id}`
+            })
+        }
+
+    }).catch(err=> {
+        console.log(err)
+        res.status(500).json({'error':err});
     })
 
 }
@@ -178,35 +174,28 @@ exports.remove = (req,res) => {
         res.status(400).send(errors);
     }
 
-            Product.updateOne({_id: req.params.id},{ $set: {
-                    deleted_at: Date.now(),
-                }}).exec(
-            ).then((doc)=>{
-                console.log('doc=> ',doc);
-                if(doc.matchedCount>0 && doc.modifiedCount>0){
-                    res.status(200).json({
-                        code: 200,
-                        message : "successfully updated! "
-                    });
-                }
-                else if(doc.matchedCount>0){
-                    res.status(404).json({
-                        message:`No Product Found with ID: ${req.params.id}`
-                    })
-                }
-                else {
-                    res.status(404).json({
-                        message:`Invalid Request on ID: ${req.params.id}`
-                    })
-                }
-
-    //         }).catch(err=> {
-    //             console.log(err)
-    //             res.status(500).json({'error':err});
-    //         })
-    //     }
+    Orders.updateOne({_id: req.params.id},{ $set: {
+            deleted_at: Date.now(),
+        }}).exec(
+    ).then((doc)=>{
+        console.log('doc=> ',doc);
+        if(doc.matchedCount>0 && doc.modifiedCount>0){
+            res.status(200).json({
+                code: 200,
+                message : "successfully updated! "
+            });
+        }
+        else if(doc.matchedCount>0){
+            res.status(404).json({
+                message:`No Product Found with ID: ${req.params.id}`
+            })
+        }
+        else {
+            res.status(404).json({
+                message:`Invalid Request on ID: ${req.params.id}`
+            })
+        }
     })
-
 }
 
 exports.delete = (req,res) => {
@@ -224,7 +213,7 @@ exports.delete = (req,res) => {
 
         res.status(400).send(errors);
     }
-    Product.deleteOne({_id:req.params.id}).exec(
+    Orders.deleteOne({_id:req.params.id}).exec(
         //
     ).then((doc)=>{
         console.log(doc);

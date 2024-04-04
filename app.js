@@ -9,6 +9,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const adminsRouter = require('./routes/admins');
 const productsRouter = require('./routes/products');
+const ordersRouter = require('./routes/orders');
 const mongoose = require("mongoose");
 
 const app = express();
@@ -40,7 +41,8 @@ app.use((req, res, next)=>{
 app.use('/', indexRouter); // open middleware
 app.use('/users', usersRouter); // employees and staff.
 app.use('/admins', adminsRouter); // admins and managers.
-app.use('/products', productsRouter); // admins and managers.
+app.use('/products', productsRouter); // products.
+app.use('/orders', ordersRouter); // orders.
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
