@@ -14,7 +14,7 @@ const mongoose = require("mongoose");
 
 const app = express();
 
-mongoose.connect('mongodb+srv://huzaifadar:'+ process.env.MONGO_ATLAS_DB_PWD +'@cluster0.9sf9tqo.mongodb.net/') // mongodb+srv://huzaifadar:<password>@cluster0.9sf9tqo.mongodb.net/
+mongoose.connect('mongodb+srv://huzaifadar:'+ process.env.MONGO_ATLAS_DB_PWD +'@cluster0.9sf9tqo.mongodb.net/',{ serverSelectionTimeoutMS: 50000 }) // mongodb+srv://huzaifadar:<password>@cluster0.9sf9tqo.mongodb.net/
 ordersCronJob.resetOrders();
 
 // view engine setup
