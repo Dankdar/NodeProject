@@ -12,7 +12,13 @@ exports.index = (req, res, next) => {
         ).then((doc)=>{
         console.log(doc);
         if(doc.length){
-            res.status(200).json(doc);
+            res.status(200).json({
+                data:{
+                    code: 200,
+                    total:doc.length,
+                    results: doc
+                }
+            });
         }
         else{
             res.status(404).json({

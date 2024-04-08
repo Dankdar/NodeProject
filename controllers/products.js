@@ -14,6 +14,7 @@ exports.index = (req, res, next) => {
         if(doc.length){
             res.status(200).json({
                 code: 200,
+                total: doc.length,
                 data: doc
             });
         }

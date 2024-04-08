@@ -13,10 +13,23 @@ exports.index = (req, res, next) => {
             //
         ).then((doc)=>{
         console.log(doc);
+        const pendingOrders = doc.filter(order => !order.is_completed);
+        const completedOrders = doc.filter(order => order.is_completed);
+
+        const responseData = {
+            pending: pendingOrders,
+            completed: completedOrders
+        };
+
         if(doc.length){
             res.status(200).json({
                 code: 200,
-                data: doc
+                total_pending: completedOrders.length,
+                total_completed: pendingOrders.length,
+                data: {
+                    completed: completedOrders,
+                    pending: pendingOrders
+                }
             });
         }
         else{
