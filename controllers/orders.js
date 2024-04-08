@@ -26,6 +26,7 @@ exports.index = (req, res, next) => {
                 code: 200,
                 total_pending: completedOrders.length,
                 total_completed: pendingOrders.length,
+                total: doc.length,
                 data: {
                     completed: completedOrders,
                     pending: pendingOrders
