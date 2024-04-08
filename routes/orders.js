@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
     res.send('respond with a products resource');
 });
 
-router.get('/index', ordersController.index );
+router.get('/index', checkAuth, ordersController.index );
 router.post('/create/:id', checkAuth, rbacMiddleware.checkPermission('create_record'), ordersController.create );
 router.patch('/update/:id', checkAuth, rbacMiddleware.checkPermission('update_record'), ordersController.update );
 router.delete('/delete/:id', checkAuth, rbacMiddleware.checkPermission('delete_record'), ordersController.delete );
