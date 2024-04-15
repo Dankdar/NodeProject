@@ -19,8 +19,8 @@ exports.index = async (req, res, next) => {
                 });
             }
             else{
-                res.status(404).json({
-                    data: response.error('No Users Exists!',404)
+                res.status(200).json({
+                    data: response.error('No Users Exists!',200)
                 })
             }
 

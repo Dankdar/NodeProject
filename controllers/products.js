@@ -6,30 +6,51 @@ const response = require("../helpers/responseApi");
 
 
 
-exports.index = (req, res, next) => {
-    Product.find().select("name signature stock details price deletedAt createdAt avatar _id")
-        .populate('signature', "name email role _id")
-        .exec(
-            //
-        ).then((doc)=>{
-        console.log(doc);
-        if(doc.length){
+exports.index = async (req, res, next) => {
+    try{
+        const result = await Product.find().select("name signature stock details price deletedAt createdAt avatar _id")
+            .populate('signature', "name email role _id")
+
+        if(result.length){
             res.status(200).json({
-                code: 200,
-                total: doc.length,
-                data: doc
-            });
-        }
-        else{
-            res.status(404).json({
-                message:"No Products Exists!"
+                data: response.success('All Products fetched!',result,200)
             })
         }
+        else{
+            res.status(200).json({
+                data: response.error('No products Exist!',200)
+            })
+        }
+    }
+    catch(error){
+        res.status(500).json({
+            error: response.error(error,500)
+        })
+    }
 
-    }).catch(err=> {
-        console.log(err)
-        res.status(500).json({'error':err});
-    })
+    // Product.find().select("name signature stock details price deletedAt createdAt avatar _id")
+    //     .populate('signature', "name email role _id")
+    //     .exec(
+    //         //
+    //     ).then((doc)=>{
+    //     console.log(doc);
+    //     if(doc.length){
+    //         res.status(200).json({
+    //             code: 200,
+    //             total: doc.length,
+    //             data: doc
+    //         });
+    //     }
+    //     else{
+    //         res.status(404).json({
+    //             message:"No Products Exists!"
+    //         })
+    //     }
+    //
+    // }).catch(err=> {
+    //     console.log(err)
+    //     res.status(500).json({'error':err});
+    // })
 }
 
 exports.create = async (req, res, next) => {
@@ -65,10 +86,8 @@ exports.create = async (req, res, next) => {
     // }
 
     try{
-        // const admin = await Admin.findOne({ _id: req.params.id })
         const admin = await Admin.findOne({ _id: req.body.signature })
             if (!admin) {
-                console.log("doc", admin);
                 return res.status(400).json({
                     message: "Invalid Id provided for admin Signature."
                 });
@@ -82,15 +101,17 @@ exports.create = async (req, res, next) => {
                     price: req.body.price,
                     avatar: req.file.path,
                 });
-                product.save().then(result => {
-                    console.log('result=> ', result);
-                    return res.status(201).json({ code: 201, "message": 'Product Created Successfully', "product":{ data: result }  });
-                }).catch(err => {
-                    console.log(err);
-                    res.status(201).json({
-                        data: response.success('Product Added successfully!', product,201)
+                const result = await product.save()
+                if(result){
+                    res.status(200).json({
+                        data: response.success('Product Created Successfully',result,200)
+                    });
+                }
+                else{
+                    res.status(400).json({
+                        data: response.error('No Users could be Added!',400)
                     })
-                });
+                }
             }
         }
         catch(error){
@@ -130,160 +151,146 @@ exports.create = async (req, res, next) => {
     //     });
 };
 
-exports.update = (req,res) => {
-    const schema = Joi.object({
-        id: Joi.string().required()
-    })
-
-    const schemaBody = Joi.object({
-        name: Joi.string().min(3).required(),
-        email: Joi.string().min(3).required(),
-        phone_number: Joi.string().required(),
-        password: Joi.string().required(),
-        role: Joi.string().required()
-    })
-
-    const result = schema.validate(req.params);
-    const resultBody = schemaBody.validate(req.body);
-
-    const errors = [];
-    if(result.error){
-        result.error.details.forEach(item => {
-            errors.push(item.message);
-        })
-
-        res.status(400).send(errors);
-    }
-
-    if(resultBody.error){
-        resultBody.error.details.forEach(item => {
-            errors.push(item.message);
-        })
-
-        res.status(400).send(errors);
-    }
-
-    bcrypt.hash(req.body.password,10,(err,hash)=>{
-        if (err){
-            return res.status(400).json({error:err});
-        }
-        else{
-            Product.updateOne({_id: req.params.id},{ $set: {
-                    name: req.body.name,
-                    email: req.body.email,
-                    phone_number: req.body.phone_number,
-                    password: hash,
-                    role: req.body.role
-                }}).exec(
-            ).then((doc)=>{
-                console.log('doc=> ',doc);
-                if(doc.matchedCount>0 && doc.modifiedCount>0){
-                    res.status(200).json({
-                        code: 200,
-                        message : "successfully updated! "
-                    });
-                }
-                else if(doc.matchedCount>0){
-                    res.status(404).json({
-                        message:`No entry Exists with ID: ${req.params.id}`
-                    })
-                }
-                else {
-                    res.status(404).json({
-                        message:`Invalid Request on ID: ${req.params.id}`
-                    })
-                }
-
-            }).catch(err=> {
-                console.log(err)
-                res.status(500).json({'error':err});
-            })
-        }
-    })
-
-}
-
-exports.remove = (req,res) => {
-    const schema = Joi.object({
-        id: Joi.string().required()
-    })
-
-    const result = schema.validate(req.params);
+exports.update = async (req,res, next) => {
+    // const schema = Joi.object({
+    //     id: Joi.string().required()
+    // })
+    //
+    // const schemaBody = Joi.object({
+    //     name: Joi.string().min(3).required(),
+    //     email: Joi.string().min(3).required(),
+    //     phone_number: Joi.string().required(),
+    //     password: Joi.string().required(),
+    //     role: Joi.string().required()
+    // })
+    //
+    // const result = schema.validate(req.params);
     // const resultBody = schemaBody.validate(req.body);
+    //
+    // const errors = [];
+    // if(result.error){
+    //     result.error.details.forEach(item => {
+    //         errors.push(item.message);
+    //     })
+    //
+    //     res.status(400).send(errors);
+    // }
+    //
+    // if(resultBody.error){
+    //     resultBody.error.details.forEach(item => {
+    //         errors.push(item.message);
+    //     })
+    //
+    //     res.status(400).send(errors);
+    // }
+    try{
+        bcrypt.hash(req.body.password,10, async (err,hash)=>{
+            if (err){
+                return res.status(400).json({error:err});
+            }
+            else{
+                const result = await Product.updateOne({_id: req.params.id},{ $set: {
+                        name: req.body.name,
+                        email: req.body.email,
+                        phone_number: req.body.phone_number,
+                        password: hash,
+                        role: req.body.role
+                    }});
 
-    const errors = [];
-    if(result.error){
-        result.error.details.forEach(item => {
-            errors.push(item.message);
+                if (result.matchedCount > 0 && result.modifiedCount > 0) {
+                    res.status(200).json(
+                        response.success("successfully updated! ", result, 200)
+                    );
+                } else if (result.matchedCount > 0){
+                    res.status(404).json(
+                        response.error(`No entry Exists with ID: ${req.params.id}`, 404)
+                    );
+                } else {
+                    res.status(404).json(
+                        response.error(`Invalid Request on ID: ${req.params.id}`, 404)
+                    );
+                }
+            }
         })
-
-        res.status(400).send(errors);
     }
-
-            Product.updateOne({_id: req.params.id},{ $set: {
-                    deleted_at: Date.now(),
-                }}).exec(
-            ).then((doc)=>{
-                console.log('doc=> ',doc);
-                if(doc.matchedCount>0 && doc.modifiedCount>0){
-                    res.status(200).json({
-                        code: 200,
-                        message : "successfully soft deleted! "
-                    });
-                }
-                else if(doc.matchedCount>0){
-                    res.status(404).json({
-                        message:`No Product Found with ID: ${req.params.id}`
-                    })
-                }
-                else {
-                    res.status(404).json({
-                        message:`Invalid Request on ID: ${req.params.id}`
-                    })
-                }
-
-    //         }).catch(err=> {
-    //             console.log(err)
-    //             res.status(500).json({'error':err});
-    //         })
-    //     }
-    })
-
+    catch(error){
+        res.status(500).json({
+            error: response.error(error,500)
+        })
+    }
 }
 
-exports.delete = (req,res) => {
-    const schema = Joi.object({
-        id: Joi.string().required()
-    })
+exports.remove = async (req,res) => {
+    // const schema = Joi.object({
+    //     id: Joi.string().required()
+    // })
+    //
+    // const result = schema.validate(req.params);
+    // // const resultBody = schemaBody.validate(req.body);
+    //
+    // const errors = [];
+    // if(result.error){
+    //     result.error.details.forEach(item => {
+    //         errors.push(item.message);
+    //     })
+    //
+    //     res.status(400).send(errors);
+    // }
 
-    const result = schema.validate(req.params);
-
-    const errors = [];
-    if(result.error){
-        result.error.details.forEach(item => {
-            errors.push(item.message);
-        })
-
-        res.status(400).send(errors);
+    try{
+        const result = await Product.updateOne({_id: req.params.id},{ $set: {
+                deleted_at: Date.now(),
+            }})
+        if (result.matchedCount > 0 && result.modifiedCount > 0) {
+            res.status(200).json(
+                response.success("successfully soft deleted! ", result, 200)
+            );
+        } else if (result.matchedCount > 0) {
+            res.status(404).json(
+                response.error(`No entry Exists with ID: ${req.params.id}`, 404)
+            );
+        } else {
+            res.status(404).json(
+                response.error(`Invalid Request on ID: ${req.params.id}`, 404)
+            );
+        }
     }
-    Product.deleteOne({_id:req.params.id}).exec(
-        //
-    ).then((doc)=>{
-        console.log(doc);
-        if(doc.deletedCount>0){
-            res.status(200).json({
-                code: 200,
-                message: "Product Deleted Succesfully!"
-            });
+    catch(error){
+        res.status(500).json({
+            error: response.error(error,500)
+        })
+    }
+}
+
+exports.delete = async (req,res) => {
+    // const schema = Joi.object({
+    //     id: Joi.string().required()
+    // })
+    //
+    // const result = schema.validate(req.params);
+    //
+    // const errors = [];
+    // if(result.error){
+    //     result.error.details.forEach(item => {
+    //         errors.push(item.message);
+    //     })
+    //
+    //     res.status(400).send(errors);
+    // }
+
+    try{
+        const result = await Product.deleteOne({_id:req.params.id})
+        if(result.deletedCount>0){
+            res.status(200).json(
+                response.success("User Deleted Successfully!",result,200));
         }
         else{
-            res.status(404).json({
-                message:`No entry Exists with ID: ${req.params.id}`
-            })
+            res.status(404).json(response.error(`No entry Exists with ID: ${req.params.id}`,404))
         }
-
-    }).catch(err=> {
-        console.log(err)
-        res.status(500).json({'error':err});
-    })
+    }
+    catch(error){
+        res.status(500).json(
+            response.error(error,500)
+        );
+    }
 }
