@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const response = require("../helpers/responseApi");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
+const User = require("../models/users");
 
 
 exports.index = async (req, res, next) => {
@@ -43,18 +44,16 @@ exports.create = async (req,res,next) => {
     //
     //     res.status(400).send(errors);
     // }
-    // console.log("úser=>", req.body)
 
     try{
         const admin = await Admin.findOne({email: req.body.email})
-        console.log(admin)
         if(admin){
             return res.status(409).json({
                 message: "E-Mail Already Taken"
             });
         }
         else{
-            bcrypt.hash(req.body.password,10,(err,hash)=>{
+            bcrypt.hash(req.body.password,10,async (err,hash)=>{
                 if (err){
                     return res.status(400).json({error:err});
                 }
@@ -67,12 +66,16 @@ exports.create = async (req,res,next) => {
                         password: hash,
                         role: req.body.role
                     })
-                    admin.save().then(result=> {
-                        console.log('result=> ',result);
+                    const result = await admin.save()
+                    if (result._id) {
                         res.status(201).json({
-                            data: response.success('Admin Created Successfully',admin,201)
+                            data: response.success('Admin Created Successfully', result, 201)
                         })
-                    })
+                    } else {
+                        res.status(409).json({
+                            data: response.error(err, 409)
+                        })
+                    }
                 }
             })
         }
@@ -101,47 +104,39 @@ exports.login = async (req, res, next) => {
     // }
 
     try{
-        const result = await Admin.findOne({email: req.body.email});
-        if(result){
-            res.status(409).json({
-                data: response.error('E-Mail Already Taken!',409)
+        const admin= await  Admin.findOne({ email: req.body.email });
+        if(!admin) {
+            res.status(404).json({
+                data: response.error("Email or Password is Incorrect and or Does Not Exist",404)
             })
         }
         else{
-            bcrypt.hash(req.body.password,10,(err,hash)=>{
-                if (err){
-                    res.status(400).json({
-                        data: response.error(err,400)
+            bcrypt.compare(req.body.password,admin.password,(err,resp)=>{
+                if(err){
+                    res.status(401).json({
+                        data: response.error("Incorrect Password or E-Mail.",401)
                     })
                 }
-                else{
-                    const admin = new Admin({
-                        _id: new mongoose.Types.ObjectId(),
-                        name: req.body.name,
-                        email: req.body.email,
-                        phoneNumber: req.body.phoneNumber,
-                        password: hash,
-                        role: req.body.role
-                    })
-
-                    admin.save().then(result=> {
-                        res.status(201).json({
-                            data: response.success('Admin Created Successfully',admin,201)
-                        })
-                    }).catch(err=>{
-                        res.status(409).json({
-                            data: response.error(err,409)
-                        })
+                if(resp){
+                    const token = jwt.sign({
+                        email: admin.email,
+                        userId: admin._id } , process.env.JWT_KEY, { expiresIn: "3h" });
+                    return res.status(200).json({
+                        message:"Logged in Successfully.",
+                        token: token
                     })
                 }
+                res.status(401).json({
+                    data: response.error("Incorrect Password or E-Mail.",401)
+                })
             })
         }
-    } catch(error){
-        res.status(400).json({
-            data: response.error(error,400)
+    }
+    catch(error){
+        res.status(500).json({
+            data: response.error(error,500)
         })
     }
-
 }
 
 exports.update = async (req,res,next) => {
@@ -285,7 +280,7 @@ exports.remove = async (req,res, next) => {
 
 }
 
-exports.delete = (req,res) => {
+exports.delete = async (req,res) => {
     // const schema = Joi.object({
     //     id: Joi.string().required()
     // })
@@ -302,7 +297,7 @@ exports.delete = (req,res) => {
     // }
 
     try{
-        const result = Admin.deleteOne({_id:req.params.id})
+        const result = await Admin.deleteOne({_id:req.params.id})
         if(result){
             if(result?.deletedCount>0){
                 res.status(200).json(response.success("Successfully removed",result,200));
