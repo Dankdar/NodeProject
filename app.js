@@ -2,6 +2,7 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
 const logger = require('morgan');
 const ordersCronJob = require('./cronjobs/orders');
 
@@ -39,6 +40,7 @@ app.use((req, res, next)=>{
 }); // middleware for json parse.
 
 app.use('/', indexRouter); // open middleware
+app.use('/public/uploads', express.static('/public/uploads')); // folder for image uploads
 app.use('/users', usersRouter); // employees and staff.
 app.use('/admins', adminsRouter); // admins and managers.
 app.use('/products', productsRouter); // products.

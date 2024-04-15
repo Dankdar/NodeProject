@@ -38,7 +38,7 @@ const userSchema = mongoose.Schema({
     name: {
         type: String,
         required: [true, 'name is Required']},
-    phone_number: {
+    phoneNumber: {
         type: String,
         validate: {
             validator: function(v) {
@@ -47,7 +47,8 @@ const userSchema = mongoose.Schema({
             message: props => `${props.value} is not a valid phone number!`
         }
     },
-    is_active: Boolean
+    isActive: Boolean,
+    createdAt: { type: Date, default: Date.now() },
 })
 
 module.exports = mongoose.model("User",userSchema);

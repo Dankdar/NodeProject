@@ -6,9 +6,9 @@ const mongoose = require("mongoose");
 
 
 exports.index = (req, res, next) => {
-    Orders.find().select("name signature stock details deleted_at  _id")
+    Orders.find().select("name signature stock details deletedAt  _id")
         .populate('signature', "name email role _id")
-        .populate('product', "name detail stock deleted_at avatar _id")
+        .populate('product', "name detail stock deletedAt avatar _id")
         .exec(
             //
         ).then((doc)=>{
@@ -196,7 +196,7 @@ exports.remove = (req,res) => {
         if(doc.matchedCount>0 && doc.modifiedCount>0){
             res.status(200).json({
                 code: 200,
-                message : "successfully updated! "
+                message : "successfully soft deleted! "
             });
         }
         else if(doc.matchedCount>0){

@@ -6,15 +6,15 @@ const rbacMiddleware = require("../middleware/rbacMiddleware");
 const router = express.Router();
 
 /* GET product listing. */
-router.get('/', function(req, res, next) {
-    res.send('respond with a products resource');
-});
+// router.get('/', function(req, res, next) {
+//     res.send('respond with a products resource');
+// });
 
-router.get('/index', checkAuth, ordersController.index );
+router.get('/', checkAuth, ordersController.index );
 router.post('/create/:id', checkAuth, rbacMiddleware.checkPermission('create_record'), ordersController.create );
-router.patch('/update/:id', checkAuth, rbacMiddleware.checkPermission('update_record'), ordersController.update );
-router.delete('/delete/:id', checkAuth, rbacMiddleware.checkPermission('delete_record'), ordersController.delete );
-router.delete('/remove/:id', checkAuth, rbacMiddleware.checkPermission('remove_record'), ordersController.remove );
+router.patch('/:id', checkAuth, rbacMiddleware.checkPermission('update_record'), ordersController.update );
+router.delete('delete/:id', checkAuth, rbacMiddleware.checkPermission('delete_record'), ordersController.delete ); // Permanent delete
+router.delete('/:id', checkAuth, rbacMiddleware.checkPermission('remove_record'), ordersController.remove ); // soft delete
 
 
 module.exports = router;
