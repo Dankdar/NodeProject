@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const logger = require('morgan');
 const ordersCronJob = require('./cronjobs/orders');
+const loggerMiddleware = require('./middleware/logs');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -39,7 +40,8 @@ app.use((req, res, next)=>{
   next();
 }); // middleware for json parse.
 
-app.use('/', indexRouter); // open middleware
+
+app.use('/', loggerMiddleware.logger); // open middleware
 app.use('/public/uploads', express.static('/public/uploads')); // folder for image uploads
 app.use('/users', usersRouter); // employees and staff.
 app.use('/admins', adminsRouter); // admins and managers.

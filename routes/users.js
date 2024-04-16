@@ -16,7 +16,7 @@ const storage = multer.diskStorage({ // Set up multer for file uploads
     // fileFilter: (req, file, cb) => {
     //     if (file.fieldname === 'avatar') {
     //         cb(null, true);
-    //     } else {
+    //     } else {x
     //         cb(new Error('Unexpected field'));
     //     }
     // }
