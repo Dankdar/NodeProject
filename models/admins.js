@@ -6,7 +6,7 @@ const adminSchema = mongoose.Schema({
     role: {
         type: String,
         enum: {
-            values: ['Admin', 'Manager'],
+            values: ['c', 'Manager'],
             message: '{VALUE} is not supported'
         },
         required: [true, 'role is Required']

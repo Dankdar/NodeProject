@@ -13,11 +13,12 @@ exports.index = async (req, res, next) => {
             .populate('signature', "name email role _id")
             .populate('product', "name detail stock deletedAt avatar _id")
             .populate('signature', "name email role _id")
+
         const data = {
             'completed Orders' : result.filter(order => order.is_completed).length,
             'pending Orders' : result.filter(order => !order.is_completed).length,
             'total Orders' : result.length,
-            'all Orders' : result,
+            'data' : result,
         }
 
         if(result.length){

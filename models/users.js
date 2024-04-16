@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const Joi = require("joi");
 
 const userSchema = mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
     role: {
         type: String,
         enum: {

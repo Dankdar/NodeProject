@@ -7,15 +7,20 @@ const mongoose = require('mongoose');
 const usersMiddleware = require('../middleware/users');
 const {validate_user} = require("../middleware/users");
 const Order = require("../models/orders");
+const xlsx = require('xlsx');
 
 
 exports.index = async (req, res, next) => {
         try {
             // Reset is_completed to 0 for all tasks
             const users = await User.find().select("name email role phoneNumber isActive _id createdAt");
+            const data = {
+                'total users' : users.length,
+                'data' : users
+            }
             if(users.length){
                 res.status(200).json({
-                    data: response.success('Success',users,200)
+                    data: response.success('Success',data,200)
                 });
             }
             else{
@@ -32,26 +37,6 @@ exports.index = async (req, res, next) => {
 }
 
 exports.create = async (req,res,next) => {
-    // const schema = Joi.object({
-    //     name: Joi.string().min(3).required(),
-    //     email: Joi.string().min(3).required(),
-    //     phone_number: Joi.string().required(),
-    //     password: Joi.string().required(),
-    //     role: Joi.string().required()
-    // })
-    // const result = schema.validate(req.body);
-    //
-    // const errors = [];
-    // if(result.error){
-    //     result.error.details.forEach(item => {
-    //         errors.push(item.message);
-    //     })
-    //
-    //     res.status(400).send(errors);
-    // }
-    // console.log("úser=>", req.body)
-    //
-
     try{
         const user = await User.findOne({email: req.body.email});
         if(user){
@@ -251,6 +236,27 @@ exports.remove = async (req,res) => {
           response.error(error,500)
         );
     }
+}
+
+exports.addBulkUser = async (req,res,next) => {
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const excelData = xlsx.utils.sheet_to_json(worksheet);
+
+    for (const row of excelData) {
+        const result = await User.findOne({ email: row.email })
+        if(!result){
+            try {
+                row.password = "$2b$10$g57HLx0B3VqIpxVT6uXYd.4/1PfMC2osy8PmGD5X1PPvMxRxLKb9C";
+                await User.create(row);
+                console.log('Data inserted successfully:', row);
+            } catch (error) {
+                console.error('Error inserting data:', error);
+            }
+        }
+    }
+    res.send('Data inserted successfully.');
 }
 
 
