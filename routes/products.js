@@ -18,7 +18,7 @@ const upload = multer({
 
 
 router.get('/', productsController.index );
-router.post('/create', checkAuth, rbacMiddleware.checkPermission('create_record'), productsMiddleware.validateProduct, upload.single('avatar'), productsController.create );
+router.post('/create', checkAuth, rbacMiddleware.checkPermission('create_record'),upload.single('avatar'), productsController.create );
 router.patch('/:id', checkAuth, rbacMiddleware.checkPermission('update_record'), productsMiddleware.validateProduct, productsController.update );
 router.delete('delete/:id', checkAuth, rbacMiddleware.checkPermission('delete_record'), productsController.delete ); // Permanent delete
 router.delete('/:id', checkAuth, rbacMiddleware.checkPermission('remove_record'), productsController.remove ); // soft delete

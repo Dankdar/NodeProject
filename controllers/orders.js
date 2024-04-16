@@ -13,10 +13,16 @@ exports.index = async (req, res, next) => {
             .populate('signature', "name email role _id")
             .populate('product', "name detail stock deletedAt avatar _id")
             .populate('signature', "name email role _id")
+        const data = {
+            'completed Orders' : result.filter(order => order.is_completed).length,
+            'pending Orders' : result.filter(order => !order.is_completed).length,
+            'total Orders' : result.length,
+            'all Orders' : result,
+        }
 
         if(result.length){
             res.status(200).json({
-                data: response.success('All Orders fetched!',result,200)
+                data: response.success('All Orders fetched!',data,200)
             })
         }
         else{

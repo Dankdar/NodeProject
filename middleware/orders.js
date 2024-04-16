@@ -39,4 +39,3 @@ exports.validateOrder = (req,res,next) => {
         res.status(400).json(response.error(errors,400));
     }
 }
-
