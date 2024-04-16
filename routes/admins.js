@@ -5,10 +5,6 @@ const router = express.Router();
 const checkAuth = require('../middleware/auth');
 const rbacMiddleware = require("../middleware/rbacMiddleware");
 
-/* GET users listing. */
-// router.get('/', function(req, res, next) {
-//     res.send('respond with a admins resource');
-// });
 
 router.get('/', adminsController.index );
 router.post('/register', adminsMiddleware.validateUser, adminsController.create );

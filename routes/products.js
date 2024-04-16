@@ -16,10 +16,6 @@ const upload = multer({
     }
 });
 
-/* GET product listing. */
-// router.get('/', function(req, res, next) {
-//     res.send('respond with a products resource');
-// });
 
 router.get('/', productsController.index );
 router.post('/create', checkAuth, rbacMiddleware.checkPermission('create_record'), productsMiddleware.validateProduct, upload.single('avatar'), productsController.create );

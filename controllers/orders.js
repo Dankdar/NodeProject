@@ -127,7 +127,6 @@ exports.remove = async (req,res) => {
             error: response.error(error,500)
         })
     }
-
 }
 
 exports.delete = async (req,res) => {

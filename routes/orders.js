@@ -5,11 +5,6 @@ const checkAuth = require("../middleware/auth");
 const rbacMiddleware = require("../middleware/rbacMiddleware");
 const router = express.Router();
 
-/* GET product listing. */
-// router.get('/', function(req, res, next) {
-//     res.send('respond with a products resource');
-// });
-
 router.get('/', checkAuth, ordersController.index );
 router.post('/create/:id', checkAuth, rbacMiddleware.checkPermission('create_record'), ordersMiddleware.validateOrder, ordersController.create );
 router.patch('/:id', checkAuth, rbacMiddleware.checkPermission('update_record'), ordersMiddleware.validateOrder, ordersController.update );
