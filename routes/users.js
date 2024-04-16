@@ -18,9 +18,9 @@ const app = express();
 // router.patch('/remove/:id', checkAuth, usersMiddleware.validate_user , rbacMiddleware.checkPermission('remove_record') , usersController.remove );
 
 router.get('/', usersController.index );
-router.post('/register', usersMiddleware.validate_user, usersController.create );
-router.post('/login',  usersMiddleware.validate_login , usersController.login );
-router.patch('/:id', checkAuth, usersMiddleware.validate_user, rbacMiddleware.checkPermission('update_record') , usersController.update );
-router.delete('/:id', checkAuth, usersMiddleware.validate_user , rbacMiddleware.checkPermission('remove_record') , usersController.remove );
+router.post('/register', usersMiddleware.validateUser, usersController.create );
+router.post('/login',  usersMiddleware.validateLogin , usersController.login );
+router.patch('/:id', checkAuth, usersMiddleware.validateUser, rbacMiddleware.checkPermission('update_record') , usersController.update );
+router.delete('/:id', checkAuth, usersMiddleware.validateUser , rbacMiddleware.checkPermission('remove_record') , usersController.remove );
 
 module.exports = router;

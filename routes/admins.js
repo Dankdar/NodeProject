@@ -11,9 +11,9 @@ const rbacMiddleware = require("../middleware/rbacMiddleware");
 // });
 
 router.get('/', adminsController.index );
-router.post('/register', adminsMiddleware.validate_user, adminsController.create );
-router.post('/login', adminsMiddleware.validate_login , adminsController.login );
-router.patch('/:id', checkAuth, rbacMiddleware.checkPermission('update_record'), adminsMiddleware.validate_user , adminsController.update );
-router.delete('/:id', checkAuth, adminsMiddleware.validate_user, rbacMiddleware.checkPermission('remove_record') , adminsController.remove );
+router.post('/register', adminsMiddleware.validateUser, adminsController.create );
+router.post('/login', adminsMiddleware.validateLogin , adminsController.login );
+router.patch('/:id', checkAuth,adminsMiddleware.validateUser, rbacMiddleware.checkPermission('update_record'), adminsController.update );
+router.delete('/:id', checkAuth, adminsMiddleware.validateUser, rbacMiddleware.checkPermission('remove_record') , adminsController.remove );
 
 module.exports = router;

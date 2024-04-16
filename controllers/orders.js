@@ -135,7 +135,7 @@ exports.create = async (req, res, next) => {
         console.log(resultantProduct)
         if(resultantProduct.length === 0){
             res.status(200).json(
-                response.success("Invalid Product Id provided.",200)
+                response.success("Invalid Product Id provided.",resultantProduct,200)
             )
         }
         else{
