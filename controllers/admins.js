@@ -227,33 +227,6 @@ exports.remove = async (req,res, next) => {
     //     res.status(400).send(errors);
     // }
 
-    Admin.updateOne({_id: req.params.id},{ $set: {
-            deletedAt: Date.now(),
-        }}).exec(
-    ).then((doc)=>{
-        console.log('doc=> ',doc);
-        if(doc.matchedCount>0 && doc.modifiedCount>0){
-            res.status(200).json({
-                message : "successfully soft deleted! "
-            });
-        }
-        else if(doc.matchedCount>0){
-            res.status(404).json({
-                message:`No entry Exists with ID: ${req.params.id}`
-            })
-        }
-        else {
-            res.status(404).json({
-                message:`Invalid Request on ID: ${req.params.id}`
-            })
-        }
-
-    })
-        .catch(err=> {
-            console.log(err)
-            res.status(500).json({'error':err});
-        })
-
     try{
         const result = await Admin.updateOne({_id: req.params.id},{ $set: {
                 deletedAt: Date.now(),
