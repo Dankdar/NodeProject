@@ -11,8 +11,8 @@ const router = express.Router();
 // });
 
 router.get('/', checkAuth, ordersController.index );
-router.post('/create/:id', checkAuth, rbacMiddleware.checkPermission('create_record'), ordersController.create );
-router.patch('/:id', checkAuth, rbacMiddleware.checkPermission('update_record'), ordersController.update );
+router.post('/create/:id', checkAuth, rbacMiddleware.checkPermission('create_record'), ordersMiddleware.validateOrder, ordersController.create );
+router.patch('/:id', checkAuth, rbacMiddleware.checkPermission('update_record'), ordersMiddleware.validateOrder, ordersController.update );
 router.delete('delete/:id', checkAuth, rbacMiddleware.checkPermission('delete_record'), ordersController.delete ); // Permanent delete
 router.delete('/:id', checkAuth, rbacMiddleware.checkPermission('remove_record'), ordersController.remove ); // soft delete
 
