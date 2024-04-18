@@ -8,6 +8,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 exports.validateOrder = (req,res,next) => {
+    console.log("=> ",req)
     const schema = Joi.object({
         name: Joi.string().min(3).required(),
         stock: Joi.number().required(),
@@ -38,4 +39,5 @@ exports.validateOrder = (req,res,next) => {
 
         res.status(400).json(response.error(errors,400));
     }
+    next();
 }

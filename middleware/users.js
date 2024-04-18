@@ -10,7 +10,7 @@ exports.validateUser = (req,res,next) => {
     const schema = Joi.object({
         name: Joi.string().min(3).required(),
         email: Joi.string().min(3).required(),
-        phoneNumber: Joi.number().required(),
+        phoneNumber: Joi.string().required(),
         password: Joi.string().required(),
         role: Joi.string().required()
     })

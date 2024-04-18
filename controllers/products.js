@@ -107,7 +107,7 @@ exports.update = async (req,res, next) => {
 exports.remove = async (req,res) => {
     try{
         const result = await Product.updateOne({_id: req.params.id},{ $set: {
-                deleted_at: Date.now(),
+                deletedAt: Date.now(),
             }})
         if (result.matchedCount > 0 && result.modifiedCount > 0) {
             res.status(200).json(
@@ -132,7 +132,9 @@ exports.remove = async (req,res) => {
 
 exports.delete = async (req,res) => {
     try{
+        console.log('=> '.req)
         const result = await Product.deleteOne({_id:req.params.id})
+        console.log('=> '.result)
         if(result.deletedCount>0){
             res.status(200).json(
                 response.success("User Deleted Successfully!",result,200));

@@ -2,11 +2,11 @@
   "roles": [
     {
       "name": "Admin",
-      "permissions": ["create_record", "read_record", "update_record", "delete_record"]
+      "permissions": ["create_record", "read_record", "update_record", "delete_record", "remove_record"]
     },
     {
       "name": "Manager",
-      "permissions": ["create_record", "read_record", "update_record"]
+      "permissions": ["create_record", "read_record", "update_record", "remove_record"]
     },
     {
       "name": "Employee",

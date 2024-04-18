@@ -10,7 +10,7 @@ exports.validateUser = (req,res,next) => {
     const schema = Joi.object({
         name: Joi.string().min(3).required(),
         email: Joi.string().min(3).required(),
-        phone_number: Joi.number().required(),
+        phoneNumber: Joi.string().min(11).required(),
         password: Joi.string().required(),
         role: Joi.string().required()
     })
@@ -31,7 +31,7 @@ exports.validateUser = (req,res,next) => {
 
 exports.validateLogin = (req,res,next) => {
     const schema = Joi.object({
-        email: Joi.string().min(3).required(),
+        phoneNumber: Joi.string().min(11).required(),
         password: Joi.string().required()
     })
     const result = schema.validate(req.body);

@@ -41,7 +41,7 @@ exports.index = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try{
-        const resultantProduct = await Products.find({ _id: req.params.id });
+        const resultantProduct = await Products.find({ _id: req.body.product });
         console.log(resultantProduct)
         if(resultantProduct.length === 0){
             res.status(200).json(

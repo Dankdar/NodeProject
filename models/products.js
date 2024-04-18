@@ -4,7 +4,6 @@ const { populate } = require("dotenv");
 const { date } = require("joi");
 
 const productSchema = mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
     signature: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', required: true },
     stock: {
         type: Number,

@@ -11,25 +11,25 @@ const xlsx = require('xlsx');
 
 
 exports.index = async (req, res, next) => {
-        try {
-            // Reset is_completed to 0 for all tasks
-            const users = await User.find().select("name email role phoneNumber isActive _id createdAt");
-            const data = {
-                'total users' : users.length,
-                'data' : users
-            }
-            if(users.length){
-                res.status(200).json({
-                    data: response.success('Success',data,200)
-                });
-            }
-            else{
-                res.status(200).json({
-                    data: response.error('No Users Exists!',200)
-                })
-            }
+    try {
+        const users = await User.find().select("name email role phoneNumber isActive _id createdAt");
+        const data = {
+            'total users' : users.length,
+            'data' : users
+        }
+        if(users.length){
+            res.status(200).json({
+                data: response.success('Success',data,200)
+            });
+        }
+        else{
+            res.status(200).json({
+                data: response.error('No Users Exists!',200)
+            })
+        }
 
-        } catch (error) {
+    }
+    catch (error) {
             res.status(500).json({
                 error: response.error(error,500)
             })
@@ -82,21 +82,6 @@ exports.create = async (req,res,next) => {
 }
 
 exports.login = async (req, res, next) => {
-    // const schema = Joi.object({
-    //     email: Joi.string().min(3).required(),
-    //     password: Joi.string().required()
-    // })
-    // const result = schema.validate(req.body);
-    //
-    // const errors = [];
-    // if(result.error){
-    //     result.error.details.forEach(item => {
-    //         errors.push(item.message);
-    //     })
-    //
-    //     res.status(400).send(errors);
-    // }
-
     try{
         const user= await  User.findOne({ email: req.body.email });
         if(!user) {
@@ -134,44 +119,9 @@ exports.login = async (req, res, next) => {
 }
 
 exports.update = async (req, res, next) => {
-    // const schema = Joi.object({
-    //     id: Joi.string().required()
-    // })
-    //
-    // const schemaBody = Joi.object({
-    //     name: Joi.string().min(3).required(),
-    //     email: Joi.string().min(3).required(),
-    //     phone_number: Joi.string().required(),
-    //     password: Joi.string().required(),
-    //     role: Joi.string().required()
-    // })
-    //
-    // const result = schema.validate(req.params);
-    // const resultBody = schemaBody.validate(req.body);
-    //
-    // const errors = [];
-    // if(result.error){
-    //     result.error.details.forEach(item => {
-    //         errors.push(item.message);
-    //     })
-    //
-    //     res.status(400).send(errors);
-    // }
-    //
-    // if(resultBody.error){
-    //     resultBody.error.details.forEach(item => {
-    //         errors.push(item.message);
-    //     })
-    //
-    //     res.status(400).send(errors);
-    // }
-
     try{
-        // console.log(req);
-        // console.log(req.body);
         bcrypt.hash(req.body.password,10,async (err, hash) => {
             if (err) {
-                // return res.status(400).json({error:err});
                 res.status(400).json(response.error(err, 400));
             } else {
                 const user = await User.updateOne({_id: req.params.id}, {
@@ -206,21 +156,6 @@ exports.update = async (req, res, next) => {
 }
 
 exports.remove = async (req,res) => {
-    // const schema = Joi.object({
-    //     id: Joi.string().required()
-    // })
-    //
-    // const result = schema.validate(req.params);
-    //
-    // const errors = [];
-    // if(result.error){
-    //     result.error.details.forEach(item => {
-    //         errors.push(item.message);
-    //     })
-    //
-    //     res.status(400).send(errors);
-    // }
-
     try{
        const user = await User.deleteOne({_id:req.params.id})
         if(user.deletedCount>0){
@@ -238,25 +173,31 @@ exports.remove = async (req,res) => {
     }
 }
 
-exports.addBulkUser = async (req,res,next) => {
+exports.addBulkUser = async (req, res, next) => {
     const workbook = xlsx.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const excelData = xlsx.utils.sheet_to_json(worksheet);
 
-    for (const row of excelData) {
-        const result = await User.findOne({ email: row.email })
-        if(!result){
-            try {
+    try {
+        for (const row of excelData) {
+            const existingUser = await User.findOne({ email: row.email });
+            if (!existingUser) {
                 row.password = "$2b$10$g57HLx0B3VqIpxVT6uXYd.4/1PfMC2osy8PmGD5X1PPvMxRxLKb9C";
                 await User.create(row);
-                console.log('Data inserted successfully:', row);
-            } catch (error) {
-                console.error('Error inserting data:', error);
+                // throw new Error("Custom Message !")
             }
         }
+        res.status(200).json({
+            message: `${excelData.length} user(s) added successfully.`
+        });
     }
-    res.send('Data inserted successfully.');
-}
+    catch (error) {
+        // console.error('Error adding bulk users:', error);
+        res.status(400).json({
+            error: 'Failed to add bulk users.'
+        });
+    }
+};
 
 

@@ -27,24 +27,6 @@ exports.index = async (req, res, next) => {
 }
 
 exports.create = async (req,res,next) => {
-    // const schema = Joi.object({
-    //     name: Joi.string().min(3).required(),
-    //     email: Joi.string().min(3).required(),
-    //     phoneNumber: Joi.string().required(),
-    //     password: Joi.string().required(),
-    //     role: Joi.string().required()
-    // })
-    // const result = schema.validate(req.body);
-    //
-    // const errors = [];
-    // if(result.error){
-    //     result.error.details.forEach(item => {
-    //         errors.push(item.message);
-    //     })
-    //
-    //     res.status(400).send(errors);
-    // }
-
     try{
         const admin = await Admin.findOne({email: req.body.email})
         if(admin){
@@ -88,33 +70,20 @@ exports.create = async (req,res,next) => {
 }
 
 exports.login = async (req, res, next) => {
-    // const schema = Joi.object({
-    //     email: Joi.string().min(3).required(),
-    //     password: Joi.string().required()
-    // })
-    // const result = schema.validate(req.body);
-    //
-    // const errors = [];
-    // if(result.error){
-    //     result.error.details.forEach(item => {
-    //         errors.push(item.message);
-    //     })
-    //
-    //     res.status(400).send(errors);
-    // }
-
     try{
-        const admin= await  Admin.findOne({ email: req.body.email });
+        // console.log('=> ',req.body.PhoneNumber)
+        const admin = await  Admin.findOne({ phoneNumber: req.body.phoneNumber });
+        // console.log('admin => ',admin)
         if(!admin) {
             res.status(404).json({
-                data: response.error("Email or Password is Incorrect and or Does Not Exist",404)
+                data: response.error("PhoneNumber or Password is Incorrect and or Does Not Exist",404)
             })
         }
         else{
             bcrypt.compare(req.body.password,admin.password,(err,resp)=>{
                 if(err){
                     res.status(401).json({
-                        data: response.error("Incorrect Password or E-Mail.",401)
+                        data: response.error("Incorrect Password or PhoneNumber.",401)
                     })
                 }
                 if(resp){
@@ -127,7 +96,7 @@ exports.login = async (req, res, next) => {
                     })
                 }
                 res.status(401).json({
-                    data: response.error("Incorrect Password or E-Mail.",401)
+                    data: response.error("Incorrect Password or PhoneNumber.",401)
                 })
             })
         }
@@ -140,44 +109,9 @@ exports.login = async (req, res, next) => {
 }
 
 exports.update = async (req,res,next) => {
-    // const schema = Joi.object({
-    //     id: Joi.string().required()
-    // })
-    //
-    // const schemaBody = Joi.object({
-    //     name: Joi.string().min(3).required(),
-    //     email: Joi.string().min(3).required(),
-    //     phoneNumber: Joi.string().required(),
-    //     password: Joi.string().required(),
-    //     role: Joi.string().required()
-    // })
-    //
-    // const result = schema.validate(req.params);
-    // const resultBody = schemaBody.validate(req.body);
-    //
-    // const errors = [];
-    // if(result.error){
-    //     result.error.details.forEach(item => {
-    //         errors.push(item.message);
-    //     })
-    //
-    //     res.status(400).send(errors);
-    // }
-    //
-    // if(resultBody.error){
-    //     resultBody.error.details.forEach(item => {
-    //         errors.push(item.message);
-    //     })
-    //
-    //     res.status(400).send(errors);
-    // }
-
     try{
-        // console.log(req);
-        // console.log(req.body);
         bcrypt.hash(req.body.password,10,async (err, hash) => {
             if (err) {
-                // return res.status(400).json({error:err});
                 res.status(400).json(response.error(err, 400));
             } else {
                 const admin = await Admin.updateOne({_id: req.params.id}, {
@@ -212,21 +146,6 @@ exports.update = async (req,res,next) => {
 }
 
 exports.remove = async (req,res, next) => {
-    // const schema = Joi.object({
-    //     id: Joi.string().required()
-    // })
-    //
-    // const result = schema.validate(req.params);
-    //
-    // const errors = [];
-    // if(result.error){
-    //     result.error.details.forEach(item => {
-    //         errors.push(item.message);
-    //     })
-    //
-    //     res.status(400).send(errors);
-    // }
-
     try{
         const result = await Admin.updateOne({_id: req.params.id},{ $set: {
                 deletedAt: Date.now(),
@@ -250,25 +169,9 @@ exports.remove = async (req,res, next) => {
     catch(error){
         res.json(response.error(error,400))
     }
-
 }
 
 exports.delete = async (req,res) => {
-    // const schema = Joi.object({
-    //     id: Joi.string().required()
-    // })
-    //
-    // const result = schema.validate(req.params);
-    //
-    // const errors = [];
-    // if(result.error){
-    //     result.error.details.forEach(item => {
-    //         errors.push(item.message);
-    //     })
-    //
-    //     res.status(400).send(errors);
-    // }
-
     try{
         const result = await Admin.deleteOne({_id:req.params.id})
         if(result){
