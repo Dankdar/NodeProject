@@ -209,7 +209,8 @@ exports.search = async (req, res) => {
         } else {
             res.status(404).json(response.error(`No entry found matching query: ${queryValue}`, 404));
         }
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Error:", error);
         res.status(500).json(response.error('Internal server error', 500));
     }
