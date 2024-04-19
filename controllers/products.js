@@ -31,6 +31,7 @@ exports.index = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try{
+        console.log('=> ',req.file)
         const admin = await Admin.findOne({ _id: req.body.signature })
             if (!admin) {
                 return res.status(400).json({
@@ -45,6 +46,11 @@ exports.create = async (req, res, next) => {
                     details: req.body.details,
                     price: req.body.price,
                     avatar: req.file.path,
+                    searchable: {
+                        name: req.body.name,
+                        details: req.body.details,
+                        seller: req.body.seller
+                    }
                 });
                 const result = await product.save()
                 if(result){
@@ -149,3 +155,64 @@ exports.delete = async (req,res) => {
         );
     }
 }
+
+exports.search = async (req, res) => {
+    try {
+        const queryValue = req.query.query ?? "";
+
+        if (!queryValue) {
+            return res.status(400).json(response.error("Query value is required.", 400));
+        }
+
+        // const searchConditions = Object.keys(Product.schema.paths)
+        //     .filter(field => field !== '_id' && field !== '__v') // Exclude fields that should not be searched
+        //     .map(field => {
+        //         const fieldType = Product.schema.paths[field].instance;
+        //         switch (fieldType) {
+        //             case 'String':
+        //                 return { [field]: { $regex: new RegExp(queryValue, 'i') } }; // Case-insensitive regex search for strings
+        //             case 'ObjectId':
+        //                 // Check if queryValue can be a valid ObjectId
+        //                 if (/^[0-9a-fA-F]{24}$/.test(queryValue)) {
+        //                     return { [field]: queryValue };
+        //                 }
+        //                 return undefined; // Skip this field if the input is not a valid ObjectId
+        //             case 'Number':
+        //                 const number = parseFloat(queryValue);
+        //                 return !isNaN(number) ? { [field]: number } : undefined;
+        //             case 'Boolean':
+        //                 const boolValue = queryValue.toLowerCase() === 'true' ? true : queryValue.toLowerCase() === 'false' ? false : undefined;
+        //                 return boolValue !== undefined ? { [field]: boolValue } : undefined;
+        //             case 'Date':
+        //                 // Attempt to parse date and create condition if successful
+        //                 const date = new Date(queryValue);
+        //                 return !isNaN(date.valueOf()) ? { [field]: date } : undefined;
+        //             default:
+        //                 // For other types, direct equality might be attempted
+        //                 return { [field]: queryValue };
+        //         }
+        //     })
+        //     .filter(condition => condition !== undefined); // Filter out undefined conditions
+
+        const searchConditions = [
+            { "searchable.name": { $regex: new RegExp(queryValue, 'i') } },
+            { "searchable.details": { $regex: new RegExp(queryValue, 'i') } },
+            { "searchable.seller": { $regex: new RegExp(queryValue, 'i') } }
+        ];
+
+        const result = await Product.find({
+            $or: searchConditions
+        });
+
+        if (result.length > 0) {
+            res.status(200).json(response.success("Search results:", result, 200));
+        } else {
+            res.status(404).json(response.error(`No entry found matching query: ${queryValue}`, 404));
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json(response.error('Internal server error', 500));
+    }
+};
+
+
