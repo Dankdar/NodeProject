@@ -159,7 +159,6 @@ exports.delete = async (req,res) => {
 exports.search = async (req, res) => {
     try {
         const queryValue = req.query.query ?? "";
-
         if (!queryValue) {
             return res.status(400).json(response.error("Query value is required.", 400));
         }

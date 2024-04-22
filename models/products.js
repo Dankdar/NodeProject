@@ -33,7 +33,7 @@ const productSchema = mongoose.Schema({
 });
 
 
-productSchema.index({'searchable.name': 1, 'searchable.details': 1, 'searchable.seller': 1}, { unique: true }); // Adding composite key
+productSchema.index({'searchable.name': 1, 'searchable.details': 1, 'searchable.seller': 1}, { unique: true }); //Adding composite key
 
 
 module.exports = mongoose.model("Product", productSchema);
